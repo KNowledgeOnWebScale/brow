@@ -5,7 +5,7 @@ Brow is expressed in [ISO Prolog](https://en.wikipedia.org/wiki/Prolog#ISO_Prolo
 TERM            | Examples
 ----------------|---------
 URI             | `'<http://example.org/etc#Socrates>'`
-LITERAL         | `"abc"` `"chat"-fr` `1.52` `1e-19` `pi`
+LITERAL         | `literal('Hello world!', type('<http://www.w3.org/2001/XMLSchema#string>'))` `literal(chat, lang(fr))` `1.52` `1e-19`
 VARIABLE        | `X` `_abc` `_`
 LIST            | `[TERM,...]` `[TERM,...`\|`LIST]` `[]`
 LINK            | `URI(TERM)` `URI(TERM,TERM)`
