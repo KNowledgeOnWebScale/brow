@@ -14,58 +14,58 @@ var knows = `
 
 :- use_module(library(lists)).
 
-'https://josd.github.io/eye/ns#colors'(_Map, Places) :-
-    findall([Place,_], 'https://josd.github.io/eye/ns#neighbours'(Place, _), Places),
+'<https://josd.github.io/eye/ns#colors>'(_Map, Places) :-
+    findall([Place,_], '<https://josd.github.io/eye/ns#neighbours>'(Place, _), Places),
     places(Places).
 
 places([]).
 places([[Place,Color]|Tail]) :-
     places(Tail),
-    'https://josd.github.io/eye/ns#neighbours'(Place, Neighbours),
+    '<https://josd.github.io/eye/ns#neighbours>'(Place, Neighbours),
     member(Color, [red,green,blue,yellow]),
     \\+ (member([Neighbour,Color], Tail), member(Neighbour, Neighbours)).
 
 % test data
-'https://josd.github.io/eye/ns#neighbours'(
-    'http://example.org/ns#place1',
-    [   'http://example.org/ns#place2',
-        'http://example.org/ns#place5',
-        'http://example.org/ns#place4',
-        'http://example.org/ns#place3'
+'<https://josd.github.io/eye/ns#neighbours>'(
+    '<http://example.org/ns#place1>',
+    [   '<http://example.org/ns#place2>',
+        '<http://example.org/ns#place5>',
+        '<http://example.org/ns#place4>',
+        '<http://example.org/ns#place3>'
     ]
 ).
-'https://josd.github.io/eye/ns#neighbours'(
-    'http://example.org/ns#place2',
-    [   'http://example.org/ns#place1',
-        'http://example.org/ns#place4',
-        'http://example.org/ns#place3'
+'<https://josd.github.io/eye/ns#neighbours>'(
+    '<http://example.org/ns#place2>',
+    [   '<http://example.org/ns#place1>',
+        '<http://example.org/ns#place4>',
+        '<http://example.org/ns#place3>'
     ]
 ).
-'https://josd.github.io/eye/ns#neighbours'(
-    'http://example.org/ns#place3',
-    [   'http://example.org/ns#place5',
-        'http://example.org/ns#place1',
-        'http://example.org/ns#place4',
-        'http://example.org/ns#place2'
+'<https://josd.github.io/eye/ns#neighbours>'(
+    '<http://example.org/ns#place3>',
+    [   '<http://example.org/ns#place5>',
+        '<http://example.org/ns#place1>',
+        '<http://example.org/ns#place4>',
+        '<http://example.org/ns#place2>'
     ]
 ).
-'https://josd.github.io/eye/ns#neighbours'(
-    'http://example.org/ns#place4',
-    [   'http://example.org/ns#place1',
-        'http://example.org/ns#place2',
-        'http://example.org/ns#place3'
+'<https://josd.github.io/eye/ns#neighbours>'(
+    '<http://example.org/ns#place4>',
+    [   '<http://example.org/ns#place1>',
+        '<http://example.org/ns#place2>',
+        '<http://example.org/ns#place3>'
     ]
 ).
-'https://josd.github.io/eye/ns#neighbours'(
-    'http://example.org/ns#place5',
-    [   'http://example.org/ns#place1',
-        'http://example.org/ns#place3'
+'<https://josd.github.io/eye/ns#neighbours>'(
+    '<http://example.org/ns#place5>',
+    [   '<http://example.org/ns#place1>',
+        '<http://example.org/ns#place3>'
     ]
 ).
 `;
 
 var query = `
-'https://josd.github.io/eye/ns#colors'(map1, Answer).
+'<https://josd.github.io/eye/ns#colors>'(map1, Answer).
 `;
 
 session.consult(knows, {
@@ -82,8 +82,8 @@ session.answer({
     success: function(answer) {
         document.write("<style>p {word-wrap: break-word}</style>");
         document.write("<h2>Running ", location.pathname.split("/").slice(-1), "</h2>");
-        document.write("<p>Query = ", query, "</p>");
-        document.write("<p>", session.format_answer(answer, {quoted: true}), "</p>");
+        document.write("<p>Query = ", query.replace(/</g, '&lt;').replace(/>/g, '&gt;'), "</p>");
+        document.write("<p>", session.format_answer(answer, {quoted: true}).replace(/</g, '&lt;').replace(/>/g, '&gt;'), "</p>");
     },
     fail: function() { /* No more answers */ },
     error: function(err) { /* Uncaught exception */ },

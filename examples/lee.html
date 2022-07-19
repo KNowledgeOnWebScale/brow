@@ -15,7 +15,7 @@ var knows = `
 
 :- use_module(library(lists)).
 
-'https://josd.github.io/eye/ns#route'([Source,Destination,Obstacles], Path) :-
+'<https://josd.github.io/eye/ns#route>'([Source,Destination,Obstacles], Path) :-
     waves(Destination, [[Source],[]], Obstacles, Waves),
     path(Source, Destination, Waves, Path).
 
@@ -80,7 +80,7 @@ path(A, B, [Wave|Waves], [B|Path]) :-
 `;
 
 var query = `
-'https://josd.github.io/eye/ns#route'([[1,1],[9,8],[[[2,3],[4,5]],[[6,6],[8,8]]]], Answer).
+'<https://josd.github.io/eye/ns#route>'([[1,1],[9,8],[[[2,3],[4,5]],[[6,6],[8,8]]]], Answer).
 `;
 
 session.consult(knows, {
@@ -97,8 +97,8 @@ session.answer({
     success: function(answer) {
         document.write("<style>p {word-wrap: break-word}</style>");
         document.write("<h2>Running ", location.pathname.split("/").slice(-1), "</h2>");
-        document.write("<p>Query = ", query, "</p>");
-        document.write("<p>", session.format_answer(answer, {quoted: true}), "</p>");
+        document.write("<p>Query = ", query.replace(/</g, '&lt;').replace(/>/g, '&gt;'), "</p>");
+        document.write("<p>", session.format_answer(answer, {quoted: true}).replace(/</g, '&lt;').replace(/>/g, '&gt;'), "</p>");
     },
     fail: function() { /* No more answers */ },
     error: function(err) { /* Uncaught exception */ },

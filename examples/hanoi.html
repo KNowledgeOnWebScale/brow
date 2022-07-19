@@ -11,16 +11,16 @@ var session = pl.create();
 var knows = `
 % Towers of Hanoi
 
-'https://josd.github.io/popeye#move'(0, [_,_,_]) :-
+'<https://josd.github.io/popeye#move>'(0, [_,_,_]) :-
     !.
-'https://josd.github.io/popeye#move'(N, [A,B,C]) :-
+'<https://josd.github.io/popeye#move>'(N, [A,B,C]) :-
     M is N-1,
-    'https://josd.github.io/popeye#move'(M, [A,C,B]),
-    'https://josd.github.io/popeye#move'(M, [C,B,A]).
+    '<https://josd.github.io/popeye#move>'(M, [A,C,B]),
+    '<https://josd.github.io/popeye#move>'(M, [C,B,A]).
 `;
 
 var query = `
-'https://josd.github.io/popeye#move'(14, [left,centre,right]).
+'<https://josd.github.io/popeye#move>'(14, [left,centre,right]).
 `;
 
 session.consult(knows, {
@@ -37,8 +37,8 @@ session.answer({
     success: function(answer) {
         document.write("<style>p {word-wrap: break-word}</style>");
         document.write("<h2>Running ", location.pathname.split("/").slice(-1), "</h2>");
-        document.write("<p>Query = ", query, "</p>");
-        document.write("<p>", session.format_answer(answer, {quoted: true}), "</p>");
+        document.write("<p>Query = ", query.replace(/</g, '&lt;').replace(/>/g, '&gt;'), "</p>");
+        document.write("<p>", session.format_answer(answer, {quoted: true}).replace(/</g, '&lt;').replace(/>/g, '&gt;'), "</p>");
     },
     fail: function() { /* No more answers */ },
     error: function(err) { /* Uncaught exception */ },
