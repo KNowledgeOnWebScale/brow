@@ -1,7 +1,7 @@
 (function() {
 	
 	// VERSION
-	var version = { major: 0, minor: 3, patch: 3, status: "beta" };
+	var version = { major: 0, minor: 3, patch: 4, status: "beta" };
 
 
 
@@ -1231,10 +1231,12 @@
 				reconsulted[context_module] = {};
 			if(options.reconsult !== false && reconsulted[context_module][indicator] !== true && !thread.is_multifile_predicate(indicator)) {
 				var get_module = thread.session.modules[context_module];
-				if(context_module !== "system" && get_module && get_module.rules[indicator])
+				if(context_module !== "system" && get_module && get_module.rules[indicator]) {
 					get_module.rules[indicator] = filter(get_module.rules[indicator], function(rule) {
 						return rule.dynamic;
 					});
+					get_module.update_indices_predicate(indicator);
+				}
 				reconsulted[context_module][indicator] = true;
 			}
 			var goal_expansion = thread.session.modules.user.rules["goal_expansion/2"];
@@ -1440,6 +1442,7 @@
 			var prev;
 			while( pointer.indicator === "./2" ) {
 				prev = pointer;
+				pointer.ground = false;
 				pointer = pointer.args[1];
 			}
 			if( pl.type.is_variable( pointer ) ) {
@@ -1858,8 +1861,9 @@
 				this.indexed_clauses[indicator] = {};
 			if(!this.indexed_clauses[indicator].hasOwnProperty(index)) {
 				this.indexed_clauses[indicator][index] = [];
-				for(var j = 0; j < this.non_indexable_clauses.length; j++)
-					this.indexed_clauses[indicator][index].push(this.non_indexable_clauses[j]);
+				if(this.non_indexable_clauses.hasOwnProperty(indicator))
+					for(var j = 0; j < this.non_indexable_clauses[indicator].length; j++)
+						this.indexed_clauses[indicator][index].push(this.non_indexable_clauses[indicator][j]);
 			}
 			this.indexed_clauses[indicator][index].push(clause);
 		} else {
@@ -7267,41 +7271,36 @@
 				thread.throw_error( pl.error.instantiation( atom.indicator ) );
 			} else if( !pl.type.is_variable( list ) && !pl.type.is_list( list ) ) {
 				thread.throw_error( pl.error.type( "list", list, atom.indicator ) );
+			} else if( !pl.type.is_atom( separator ) && !pl.type.is_number( separator ) ) {
+				thread.throw_error( pl.error.type( "atomic", separator, atom.indicator ) );
 			} else if( !pl.type.is_variable( concat ) && !pl.type.is_atom( concat ) ) {
 				thread.throw_error( pl.error.type( "atom", concat, atom.indicator ) );
 			} else {
-				if( !pl.type.is_variable( concat ) ) {
-					var atomic = arrayToList( map(
-						concat.id.split( separator.id ),
-						function( id ) {
-							return new Term( id, [] );
-						}
-					) );
-					thread.prepend( [new State( point.goal.replace( new Term( "=", [atomic, list] ) ), point.substitution, point )] );
-				} else {
-					var id = "";
-					var pointer = list;
-					while( pl.type.is_term( pointer ) && pointer.indicator === "./2" ) {
-						if( !pl.type.is_atom( pointer.args[0] ) && !pl.type.is_number( pointer.args[0] ) ) {
-							thread.throw_error( pl.error.type( "atomic", pointer.args[0], atom.indicator ) );
-							return;
-						}
-						if( id !== "" )
-							id += separator.id;
-						if( pl.type.is_atom( pointer.args[0] ) )
-							id += pointer.args[0].id;
-						else
-							id += "" + pointer.args[0].value;
-						pointer = pointer.args[1];
-					}
-					id = new Term( id, [] );
-					if( pl.type.is_variable( pointer ) ) {
+				var id = "";
+				var pointer = list;
+				while( pl.type.is_term( pointer ) && pointer.indicator === "./2" ) {
+					if( pl.type.is_variable( pointer.args[0] ) ) {
 						thread.throw_error( pl.error.instantiation( atom.indicator ) );
-					} else if( !pl.type.is_term( pointer ) || pointer.indicator !== "[]/0" ) {
-						thread.throw_error( pl.error.type( "list", list, atom.indicator ) );
-					} else {
-						thread.prepend( [new State( point.goal.replace( new Term( "=", [id, concat] ) ), point.substitution, point )] );
+						return;
+					} else if( !pl.type.is_atom( pointer.args[0] ) && !pl.type.is_number( pointer.args[0] ) ) {
+						thread.throw_error( pl.error.type( "atomic", pointer.args[0], atom.indicator ) );
+						return;
 					}
+					if( id !== "" )
+						id += separator.id;
+					if( pl.type.is_atom( pointer.args[0] ) )
+						id += pointer.args[0].id;
+					else
+						id += "" + pointer.args[0].value;
+					pointer = pointer.args[1];
+				}
+				id = new Term( id, [] );
+				if( pl.type.is_variable( pointer ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_term( pointer ) || pointer.indicator !== "[]/0" ) {
+					thread.throw_error( pl.error.type( "list", list, atom.indicator ) );
+				} else {
+					thread.prepend( [new State( point.goal.replace( new Term( "=", [id, concat] ) ), point.substitution, point )] );
 				}
 			}
 		},
